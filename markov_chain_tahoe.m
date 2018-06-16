@@ -1,6 +1,7 @@
 % Tahoe version
 clear
 
+% Inicio del código
 p = 0.001;
 N = 1000; % iteraciones
 C = ceil(sqrt(3/(2*p)))*10; % estados (ventanas de congestion, cwnd)

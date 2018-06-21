@@ -9,7 +9,7 @@ beta = 0.5; %0.85
 p = 0.001;
 % N = 1000; % iteraciones
 N = 0;
-C = ceil(sqrt((alfa*(1+beta))/(2*p*(1-beta))))*5; % estados (ventanas de congestion, cwnd), se asume b=1 en fórmula
+C = ceil(sqrt((alfa*(1+beta))/(2*p*(1-beta))))*10; % estados (ventanas de congestion, cwnd), se asume b=1 en fórmula
 cwnd_min = 2;
 cwnd_max = C;
 delta_cwnd = 0.025; %0.025
@@ -26,7 +26,7 @@ ai_index = indexing_general(cwnd_array, delta_cwnd, post_ai);
 md_index = indexing_general(cwnd_array, delta_cwnd, post_md);
  
 
-error = 1e-20;
+error = 1e-6;
 while 1    
     N = N+1;
     for i = 1:length(cwnd_array)

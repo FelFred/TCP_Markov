@@ -3,8 +3,8 @@ clear
 close all
 
 % Inicio del código
-alfa = 1; %0.31
-beta = 0.5; %0.85
+alfa = 0.31; %0.31
+beta = 0.85; %0.85
 
 p = 0.001;
 % N = 1000; % iteraciones
@@ -29,9 +29,9 @@ md_index = indexing_general(cwnd_array, post_md);
 error = 1e-6;
 while 1    
     N = N+1;
-    if(mod(N,20) == 0 & N < 300)
-        prev_weight = collapse_to_int(cwnd_array, prev_weight);
-    end
+%     if(mod(N,200) == 0 & N < 300)
+%         prev_weight = collapse_to_int(cwnd_array, prev_weight);
+%     end
     for i = 1:length(cwnd_array)
         cwnd = floor(cwnd_array(i));
         % Transición de probabilidades al siguiente vector de pesos

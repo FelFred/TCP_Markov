@@ -22,13 +22,16 @@ weight = zeros(1,L_cwnd); % siguiente vector de peso
 % Cálculo del siguiente índice en base a incremento aditivo (función de alfa)
 post_ai = cwnd_array + alfa;
 post_md = cwnd_array * beta;
-ai_index = indexing_general(cwnd_array, delta_cwnd, post_ai);
-md_index = indexing_general(cwnd_array, delta_cwnd, post_md);
+ai_index = indexing_general(cwnd_array, post_ai);
+md_index = indexing_general(cwnd_array, post_md);
  
 
 error = 1e-6;
 while 1    
     N = N+1;
+    if(mod(N,20) == 0 & N < 300)
+        prev_weight = collapse_to_int(cwnd_array, prev_weight);
+    end
     for i = 1:length(cwnd_array)
         cwnd = floor(cwnd_array(i));
         % Transición de probabilidades al siguiente vector de pesos

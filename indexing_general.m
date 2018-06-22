@@ -1,5 +1,6 @@
-function y = indexing_general(original_array, delta, postop_array)
-    min_value = original_array(1);    
+function y = indexing_general(original_array, postop_array)
+    min_value = original_array(1);
+    delta = abs(original_array(2)-original_array(1));
     remainder_array = mod(postop_array,delta);
     remainder_ineq = remainder_array >= delta/2;
     quotient_array = floor(postop_array/delta);

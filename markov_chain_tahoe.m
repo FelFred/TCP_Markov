@@ -32,5 +32,7 @@ while 1
 end
 
 average = sum(prev_weight.*(1:C));
-fprintf('theoretical = %4.3f, ', sqrt(3/(2*p)))
+b = 1;
+tahoe_throughput = ((1-p)*(1-p+sqrt(p*pi/(2*b))))/(sqrt(b*p*pi/2))
+fprintf('theoretical = %4.3f, ', tahoe_throughput);
 fprintf('simulation = %4.3f\n', average)

@@ -51,13 +51,15 @@ while (N<N_iteraciones-1)
     t = N+1;
     x = rand;
     
-    % Cálculom de BWE     
+    % Cálculom de BWE
+    n_virtual = floor( (RTT-(dt_ack * cwnd_array(t-1))) / (tau/m));  % Notar que tau/m es muy grande asi que nunca se tendrán muestras virtuales, es decir n_virtual es 0 siempre.
     n_samples = round(cwnd_array(t-1))+1;
     t_array = zeros(1,n_samples);
     t_array(1) = last_time;
     for l = 1:n_samples-1
         t_array(l+1) = l*dt_ack;
     end
+    
     last_time = -(RTT-t_array(end));
     deltat_array = zeros(1,n_samples-1);
     samples_array = zeros(1,length(t_array));
@@ -73,8 +75,7 @@ while (N<N_iteraciones-1)
     last_sample = samples_array(end);
     BWE_array(t) = filtered_array(end);
     % Fin BWE
-    
-    
+        
     %Actualizción de la ventana
     if (x>=p)
         cwnd_array(t) = cwnd_array(t-1) + 1;
@@ -94,9 +95,12 @@ while (N<N_iteraciones-1)
 end
 
 figure()
-plot(it_array, cwnd_array, 'rx')
+plot(it_array/RTT, cwnd_array, 'rx')
 hold on
 % figure()
-plot(it_array, gaimd_array, 'b')
+plot(it_array/RTT, gaimd_array, 'b')
 hold on
-plot(it_array, (BWE_array*RTT), 'kx')
+plot(it_array/RTT, (BWE_array*RTT), 'kx')
+xlabel('Time [s/RTT]')
+ylabel('Cwnd [packets]')
+legend('Westwood Window','GAIMD Window','BWE_estimation')

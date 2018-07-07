@@ -16,7 +16,13 @@
 % tiempo para el caso de reno vs westwood. Se desea observar que tipo de
 % comportamiento resulta de la respuesta frente a pérdidas.
 
+% Notar que tau/m es muy grande asi que nunca se tendrán muestras
+% virtuales, es decir n_virtual es 0 siempre (considerando tau = 0.5 y m =
+% 2 valores de paper(s))
+ 
 %% Inicio código
+clear all
+close all
 
 alfa = 0.31; %0.31
 beta = 0.85; %0.85
@@ -34,50 +40,61 @@ N_iteraciones = 10000;
 it_array = 1:N_iteraciones;                               % Vector de iteraciones
 cwnd_array = zeros(1,length(it_array));
 cwnd_array(1) = 2;
+gaimd_array = cwnd_array; 
 BWE_array = zeros(1,length(it_array));           % Vector de bwe filtrado
 BWE_array(1) = 1*MSS/RTT;
 last_time = -(RTT-dt_ack*1);
 last_sample = BWE_array(1);
-while (N<N_iteraciones)    
-    N = N+1;
+n_perdidas = 0;
+while (N<N_iteraciones-1)    
+    N = N+1
     t = N+1;
     x = rand;
     
-    % Cálculom de BWE 
-    n_virtual = floor( (RTT-(dt_ack * cwnd_array(t-1))) / (tau/m));  % Notar que tau/m es muy grande asi que nunca se tendrán muestras virtuales, es decir n_virtual es 0 siempre.
-    n_samples = cwnd_array(t-1)+n_virtual;
+    % Cálculom de BWE     
+    n_samples = ceil(cwnd_array(t-1)/MSS)+1;
     t_array = zeros(1,n_samples);
     t_array(1) = last_time;
-    for l = 1:cwnd_array(t-1)
+    for l = 1:n_samples
         t_array(l+1) = l*dt_ack;
     end
-    deltat_array = zeros(1,n_samples-1);
+    last_time = -(RTT-t_array(end));
+    deltat_array = zeros(1,n_samples);
     samples_array = zeros(1,length(t_array));
     samples_array(1) = last_sample;
     filtered_array = zeros(1,length(t_array));
     filtered_array(1) = BWE_array(t-1);
-    for j = 1:n_samples-1
+    for j = 1:n_samples
         deltat_array(j) = t_array(j+1)-t_array(j);
-        alfa_k = (2*tau + deltat_array(j))/(2*tau - deltat_array(j));
+        alfa_k = (2*tau - deltat_array(j))/(2*tau + deltat_array(j));
         samples_array(j+1) = MSS/deltat_array(j);
-        filtered_array(j+1) = alfa_k*filtered_array(t-1) + (1-alfa_k)*(samples_array(j+1)+samples_array(j))/2; 
+        filtered_array(j+1) = alfa_k*filtered_array(j) + (1-alfa_k)*(samples_array(j+1)+samples_array(j))/2; 
     end   
-    
+    last_sample = samples_array(end);
     BWE_array(t) = filtered_array(end);
     % Fin BWE
     
     
     %Actualizción de la ventana
     if (x>=p)
-        cwnd_array(t) = cwnd_array(t-1) + 1;
+        cwnd_array(t) = cwnd_array(t-1) + MSS;
+        gaimd_array(t) = gaimd_array(t-1) + MSS;
     else
-        
+        n_perdidas = n_perdidas + 1;
         cwnd_array(t) = BWE_array(t-1) * RTT;
+        gaimd_array(t) = gaimd_array(t-1) * beta;
     end
+%     samples_array
+%     filtered_array
+%     t_array
+%     pause()
+%     close all
 end
 
 figure()
-plot(it_array, cwnd_array)
-
-figure()
-plot(it_array, BWE_array)
+plot(it_array, floor(cwnd_array/MSS), 'r')
+hold on
+% figure()
+plot(it_array, floor(gaimd_array/MSS), 'b')
+hold on
+plot(it_array, (BWE_array*RTT/MSS), 'kx')

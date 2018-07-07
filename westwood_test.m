@@ -24,8 +24,8 @@
 clear all
 close all
 
-alfa = 0.31; %0.31
-beta = 0.85; %0.85
+alfa = 1; %0.31
+beta = 0.5; %0.85
 p = 0.001;
 N = 0;
 C = ceil(sqrt((alfa*(1+beta))/(2*p*(1-beta))))*10; % estados (ventanas de congestion, cwnd), se asume b=1 en fórmula
@@ -42,7 +42,7 @@ cwnd_array = zeros(1,length(it_array));
 cwnd_array(1) = 2;
 gaimd_array = cwnd_array; 
 BWE_array = zeros(1,length(it_array));           % Vector de bwe filtrado
-BWE_array(1) = 1*MSS/RTT;
+BWE_array(1) = 1/RTT;
 last_time = -(RTT-dt_ack*1);
 last_sample = BWE_array(1);
 n_perdidas = 0;
@@ -52,22 +52,22 @@ while (N<N_iteraciones-1)
     x = rand;
     
     % Cálculom de BWE     
-    n_samples = ceil(cwnd_array(t-1)/MSS)+1;
+    n_samples = round(cwnd_array(t-1))+1;
     t_array = zeros(1,n_samples);
     t_array(1) = last_time;
-    for l = 1:n_samples
+    for l = 1:n_samples-1
         t_array(l+1) = l*dt_ack;
     end
     last_time = -(RTT-t_array(end));
-    deltat_array = zeros(1,n_samples);
+    deltat_array = zeros(1,n_samples-1);
     samples_array = zeros(1,length(t_array));
     samples_array(1) = last_sample;
     filtered_array = zeros(1,length(t_array));
     filtered_array(1) = BWE_array(t-1);
-    for j = 1:n_samples
+    for j = 1:n_samples-1
         deltat_array(j) = t_array(j+1)-t_array(j);
         alfa_k = (2*tau - deltat_array(j))/(2*tau + deltat_array(j));
-        samples_array(j+1) = MSS/deltat_array(j);
+        samples_array(j+1) = 1/deltat_array(j);
         filtered_array(j+1) = alfa_k*filtered_array(j) + (1-alfa_k)*(samples_array(j+1)+samples_array(j))/2; 
     end   
     last_sample = samples_array(end);
@@ -77,8 +77,8 @@ while (N<N_iteraciones-1)
     
     %Actualizción de la ventana
     if (x>=p)
-        cwnd_array(t) = cwnd_array(t-1) + MSS;
-        gaimd_array(t) = gaimd_array(t-1) + MSS;
+        cwnd_array(t) = cwnd_array(t-1) + 1;
+        gaimd_array(t) = gaimd_array(t-1) + 1;
     else
         n_perdidas = n_perdidas + 1;
         cwnd_array(t) = BWE_array(t-1) * RTT;
@@ -87,14 +87,16 @@ while (N<N_iteraciones-1)
 %     samples_array
 %     filtered_array
 %     t_array
+%     figure()
+%     plot(1:length(filtered_array), filtered_array,'o')
 %     pause()
 %     close all
 end
 
 figure()
-plot(it_array, floor(cwnd_array/MSS), 'r')
+plot(it_array, cwnd_array, 'rx')
 hold on
 % figure()
-plot(it_array, floor(gaimd_array/MSS), 'b')
+plot(it_array, gaimd_array, 'b')
 hold on
-plot(it_array, (BWE_array*RTT/MSS), 'kx')
+plot(it_array, (BWE_array*RTT), 'kx')

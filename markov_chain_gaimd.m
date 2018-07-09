@@ -43,7 +43,7 @@ while 1
 %     axis([25 43 0.022 0.027]) % prueba con p = 0.001
     axis([0 ceil(sqrt((alfa*(1+beta))/(2*p*(1-beta)))/7)*20 0 max(weight)])
 %     fprintf('error = %4.12f\n', sum(abs(prev_weight-weight)))
-    pause(0.001)
+    pause(0.0001)
 %     drawnow
     if sum(abs(prev_weight-weight)) < error
         break
